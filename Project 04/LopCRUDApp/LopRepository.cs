@@ -24,12 +24,13 @@ namespace LopCRUDApp
             using (var connection = GetConnection())
             {
                 connection.Open();
+                // Đã sửa @Site để chấp nhận string
                 using (var command = new SqlCommand("INSERT INTO V_Lop (MaLop, TenLop, Khoa, Site) VALUES (@MaLop, @TenLop, @Khoa, @Site)", connection))
                 {
                     command.Parameters.AddWithValue("@MaLop", lop.MaLop);
                     command.Parameters.AddWithValue("@TenLop", lop.TenLop);
                     command.Parameters.AddWithValue("@Khoa", lop.Khoa);
-                    command.Parameters.AddWithValue("@Site", lop.Site);
+                    command.Parameters.AddWithValue("@Site", lop.Site); // Giờ là string 'Site1', 'Site2'...
                     command.ExecuteNonQuery();
                 }
             }
@@ -41,22 +42,21 @@ namespace LopCRUDApp
             using (var connection = GetConnection())
             {
                 connection.Open();
-                using (var command = new SqlCommand("UPDATE V_Lop SET TenLop = @TenLop, Khoa = @Khoa, Site = @Site WHERE MaLop = @MaLop AND Site = @OriginalSite", connection))
+                // Đã sửa @OriginalSite và @Site để chấp nhận string
+                using (var command = new SqlCommand("UPDATE V_Lop SET TenLop = @TenLop, Khoa = @Khoa WHERE MaLop = @MaLop AND Site = @OriginalSite", connection))
                 {
                     command.Parameters.AddWithValue("@MaLop", lop.MaLop);
                     command.Parameters.AddWithValue("@TenLop", lop.TenLop);
                     command.Parameters.AddWithValue("@Khoa", lop.Khoa);
-                    command.Parameters.AddWithValue("@Site", lop.Site);
-                    // Cần một cách để xác định Site ban đầu để trigger hoạt động đúng
-                    // Hiện tại, giả định Site không thay đổi khi update MaLop
-                    command.Parameters.AddWithValue("@OriginalSite", lop.Site);
+                    command.Parameters.AddWithValue("@OriginalSite", lop.Site); // Dùng string
                     command.ExecuteNonQuery();
                 }
             }
             Console.WriteLine($"Đã cập nhật lớp {lop.MaLop} trên Site {lop.Site}.");
         }
 
-        public void DeleteLop(string maLop, int site)
+        // Đã sửa int site thành string site
+        public void DeleteLop(string maLop, string site)
         {
             using (var connection = GetConnection())
             {
@@ -64,7 +64,7 @@ namespace LopCRUDApp
                 using (var command = new SqlCommand("DELETE FROM V_Lop WHERE MaLop = @MaLop AND Site = @Site", connection))
                 {
                     command.Parameters.AddWithValue("@MaLop", maLop);
-                    command.Parameters.AddWithValue("@Site", site);
+                    command.Parameters.AddWithValue("@Site", site); // Dùng string
                     command.ExecuteNonQuery();
                 }
             }
@@ -88,7 +88,8 @@ namespace LopCRUDApp
                                 MaLop = reader["MaLop"].ToString(),
                                 TenLop = reader["TenLop"].ToString(),
                                 Khoa = reader["Khoa"].ToString(),
-                                Site = Convert.ToInt32(reader["Site"])
+                                // Đã sửa, đọc thẳng string, không Convert
+                                Site = reader["Site"].ToString()
                             });
                         }
                     }
@@ -97,7 +98,8 @@ namespace LopCRUDApp
             return lops;
         }
 
-        public Lop GetLopByMaLopAndSite(string maLop, int site)
+        // Đã sửa int site thành string site
+        public Lop GetLopByMaLopAndSite(string maLop, string site)
         {
             using (var connection = GetConnection())
             {
@@ -105,7 +107,7 @@ namespace LopCRUDApp
                 using (var command = new SqlCommand("SELECT MaLop, TenLop, Khoa, Site FROM V_Lop WHERE MaLop = @MaLop AND Site = @Site", connection))
                 {
                     command.Parameters.AddWithValue("@MaLop", maLop);
-                    command.Parameters.AddWithValue("@Site", site);
+                    command.Parameters.AddWithValue("@Site", site); // Dùng string
                     using (var reader = command.ExecuteReader())
                     {
                         if (reader.Read())
@@ -115,7 +117,8 @@ namespace LopCRUDApp
                                 MaLop = reader["MaLop"].ToString(),
                                 TenLop = reader["TenLop"].ToString(),
                                 Khoa = reader["Khoa"].ToString(),
-                                Site = Convert.ToInt32(reader["Site"])
+                                // Đã sửa, đọc thẳng string, không Convert
+                                Site = reader["Site"].ToString()
                             };
                         }
                     }
