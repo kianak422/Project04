@@ -31,6 +31,12 @@ namespace LopCRUDApp
                 Console.WriteLine("9. Form 1: Tìm Khoa của Sinh viên");
                 Console.WriteLine("10. Form 2: Xem Bảng điểm Sinh viên");
                 Console.WriteLine("11. Form 3: Điểm TB cao nhất mỗi Khoa");
+                Console.WriteLine("--- Module Sinh Viên (Anh) ---");
+                Console.WriteLine("12. Thêm Sinh Viên");
+                Console.WriteLine("13. Cập nhật Sinh Viên");
+                Console.WriteLine("14. Xóa Sinh Viên");
+                Console.WriteLine("15. Xem tất cả Sinh Viên");
+                Console.WriteLine("16. Tìm Sinh Viên theo Mã & Site");
                 Console.WriteLine("0. Thoát");
                 Console.Write("Chọn chức năng: ");
 
@@ -71,6 +77,11 @@ namespace LopCRUDApp
                     case "11":
                         queryRepo.GetDiemTrungBinhCaoNhatKhoa();
                         break;
+                    case "12": AddSinhVien(svRepo); break;
+                    case "13": UpdateSinhVien(svRepo); break;
+                    case "14": DeleteSinhVien(svRepo); break;
+                    case "15": ViewAllSinhVien(svRepo); break;
+                    case "16": GetSinhVienByMaSVAndSite(svRepo); break;
                     case "0":
                         return;
                     default:
@@ -237,6 +248,137 @@ namespace LopCRUDApp
                 Console.WriteLine($"Không tìm thấy Lớp với Mã Lớp {maLop} và Site {site}.");
             }
         }
+        #endregion
+
+         #region Chức năng của Anh
+
+        static void AddSinhVien(SinhVienRepository repo)
+        {
+            Console.Write("Nhập Mã Sinh Viên: ");
+            string maSV = Console.ReadLine();
+
+            Console.Write("Nhập Họ Tên: ");
+            string hoTen = Console.ReadLine();
+
+            Console.Write("Nhập Phái (Nam/Nữ): ");
+            string phai = Console.ReadLine();
+
+            Console.Write("Nhập Ngày Sinh (yyyy-MM-dd): ");
+            DateTime ngaySinh = DateTime.Parse(Console.ReadLine());
+
+            Console.Write("Nhập Mã Lớp: ");
+            string maLop = Console.ReadLine();
+
+            Console.Write("Nhập Học Bổng: ");
+            decimal hocBong = decimal.Parse(Console.ReadLine());
+
+            Console.Write("Nhập Site ('Site1','Site2','Site3'): ");
+            string site = Console.ReadLine();
+
+            SinhVien sv = new SinhVien
+            {
+                MaSV = maSV,
+                HoTen = hoTen,
+                Phai = phai,
+                NgaySinh = ngaySinh,
+                MaLop = maLop,
+                HocBong = hocBong,
+                Site = site
+            };
+
+            repo.AddSinhVien(sv);
+        }
+
+        static void UpdateSinhVien(SinhVienRepository repo)
+        {
+            Console.Write("Nhập Mã Sinh Viên cần cập nhật: ");
+            string maSV = Console.ReadLine();
+
+            Console.Write("Nhập Site của sinh viên: ");
+            string site = Console.ReadLine();
+
+            var sv = repo.GetSinhVienByMaSVAndSite(maSV, site);
+            if (sv == null)
+            {
+                Console.WriteLine("Không tìm thấy sinh viên!");
+                return;
+            }
+
+            Console.WriteLine($"Đang cập nhật Sinh viên: {sv.HoTen}");
+
+            Console.Write("Nhập tên mới (để trống nếu giữ nguyên): ");
+            string ten = Console.ReadLine();
+            if (!string.IsNullOrEmpty(ten)) sv.HoTen = ten;
+
+            Console.Write("Nhập phái mới (để trống nếu giữ nguyên): ");
+            string phai = Console.ReadLine();
+            if (!string.IsNullOrEmpty(phai)) sv.Phai = phai;
+
+            Console.Write("Nhập ngày sinh mới (để trống nếu giữ nguyên): ");
+            string ns = Console.ReadLine();
+            if (!string.IsNullOrEmpty(ns)) sv.NgaySinh = DateTime.Parse(ns);
+
+            Console.Write("Nhập mã lớp mới (để trống nếu giữ nguyên): ");
+            string ml = Console.ReadLine();
+            if (!string.IsNullOrEmpty(ml)) sv.MaLop = ml;
+
+            Console.Write("Nhập học bổng mới (để trống nếu giữ nguyên): ");
+            string hb = Console.ReadLine();
+            if (!string.IsNullOrEmpty(hb)) sv.HocBong = decimal.Parse(hb);
+
+            repo.UpdateSinhVien(sv);
+        }
+
+        static void DeleteSinhVien(SinhVienRepository repo)
+        {
+            Console.Write("Nhập Mã Sinh Viên cần xóa: ");
+            string maSV = Console.ReadLine();
+
+            Console.Write("Nhập Site: ");
+            string site = Console.ReadLine();
+
+            repo.DeleteSinhVien(maSV, site);
+        }
+
+        static void ViewAllSinhVien(SinhVienRepository repo)
+        {
+            var list = repo.GetAllSinhVien();
+            if (list.Count == 0)
+            {
+                Console.WriteLine("Không có sinh viên nào.");
+                return;
+            }
+
+            Console.WriteLine("\n--- Danh sách Sinh Viên ---");
+            foreach (var sv in list)
+            {
+                Console.WriteLine(
+                    $"MaSV: {sv.MaSV}, HoTen: {sv.HoTen}, Phai: {sv.Phai}, " +
+                    $"NgaySinh: {sv.NgaySinh:yyyy-MM-dd}, MaLop: {sv.MaLop}, HocBong: {sv.HocBong}, Site: {sv.Site}");
+            }
+        }
+
+        static void GetSinhVienByMaSVAndSite(SinhVienRepository repo)
+        {
+            Console.Write("Nhập Mã Sinh Viên: ");
+            string maSV = Console.ReadLine();
+
+            Console.Write("Nhập Site: ");
+            string site = Console.ReadLine();
+
+            var sv = repo.GetSinhVienByMaSVAndSite(maSV, site);
+            if (sv == null)
+            {
+                Console.WriteLine("Không tìm thấy sinh viên.");
+                return;
+            }
+
+            Console.WriteLine("\n--- Thông tin Sinh Viên ---");
+            Console.WriteLine(
+                $"MaSV: {sv.MaSV}, HoTen: {sv.HoTen}, Phai: {sv.Phai}, " +
+                $"NgaySinh: {sv.NgaySinh:yyyy-MM-dd}, MaLop: {sv.MaLop}, HocBong: {sv.HocBong}, Site: {sv.Site}");
+        }
+
         #endregion
 
         // Cần cập nhật Lop.cs và LopRepository.cs để dùng Site là string thay vì int
