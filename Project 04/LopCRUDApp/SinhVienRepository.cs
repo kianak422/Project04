@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 
-namespace SinhVienCRUDApp
+namespace LopCRUDApp
 {
     public class SinhVienRepository
     {
@@ -172,3 +172,4 @@ namespace SinhVienCRUDApp
         }
     }
 }
+
