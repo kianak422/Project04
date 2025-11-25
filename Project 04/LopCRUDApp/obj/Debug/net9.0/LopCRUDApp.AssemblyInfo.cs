@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("LopCRUDApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+65c453f338da0938e51a0fc3592b96c776896d7b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a58d177250a23568f05e123ba3b3c911c8d33e16")]
 [assembly: System.Reflection.AssemblyProductAttribute("LopCRUDApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("LopCRUDApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
