@@ -88,7 +88,7 @@ BEGIN
             EXEC sp_executesql @sql, N'@MaSV CHAR(10)', @MaSV=@delMaSV;
 
             SET @sql = N'DELETE FROM CSDLPT_Site2.dbo.SinhVien WHERE MaSV = @MaSV;';
-            EXEC sp_executesql @sql, N'@MaSV CHAR(10)', @MA SV=@delMaSV;
+            EXEC sp_executesql @sql, N'@MaSV CHAR(10)', @MASV=@delMaSV;
 
             SET @sql = N'DELETE FROM CSDLPT_Site3.dbo.SinhVien WHERE MaSV = @MaSV;';
             EXEC sp_executesql @sql, N'@MaSV CHAR(10)', @MaSV=@delMaSV;

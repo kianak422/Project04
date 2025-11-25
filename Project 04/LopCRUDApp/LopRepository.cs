@@ -1,130 +1,71 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace LopCRUDApp
 {
     public class LopRepository
     {
-        private readonly string _connectionString;
+        private readonly ApplicationDbContext _context;
 
-        public LopRepository(string connectionString)
+        public LopRepository(ApplicationDbContext context)
         {
-            _connectionString = connectionString;
-        }
-
-        private SqlConnection GetConnection()
-        {
-            return new SqlConnection(_connectionString);
+            _context = context;
         }
 
         public void AddLop(Lop lop)
         {
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-                // Đã sửa @Site để chấp nhận string
-                using (var command = new SqlCommand("INSERT INTO V_Lop (MaLop, TenLop, Khoa, Site) VALUES (@MaLop, @TenLop, @Khoa, @Site)", connection))
-                {
-                    command.Parameters.AddWithValue("@MaLop", lop.MaLop);
-                    command.Parameters.AddWithValue("@TenLop", lop.TenLop);
-                    command.Parameters.AddWithValue("@Khoa", lop.Khoa);
-                    command.Parameters.AddWithValue("@Site", lop.Site); // Giờ là string 'Site1', 'Site2'...
-                    command.ExecuteNonQuery();
-                }
-            }
+            _context.Lops.Add(lop);
+            _context.SaveChanges();
             Console.WriteLine($"Đã thêm lớp {lop.TenLop} vào Site {lop.Site}.");
         }
 
         public void UpdateLop(Lop lop)
         {
-            using (var connection = GetConnection())
+            var existingLop = _context.Lops.FirstOrDefault(l => l.MaLop == lop.MaLop && l.Site == lop.Site);
+            if (existingLop != null)
             {
-                connection.Open();
-                // Đã sửa @OriginalSite và @Site để chấp nhận string
-                using (var command = new SqlCommand("UPDATE V_Lop SET TenLop = @TenLop, Khoa = @Khoa WHERE MaLop = @MaLop AND Site = @OriginalSite", connection))
-                {
-                    command.Parameters.AddWithValue("@MaLop", lop.MaLop);
-                    command.Parameters.AddWithValue("@TenLop", lop.TenLop);
-                    command.Parameters.AddWithValue("@Khoa", lop.Khoa);
-                    command.Parameters.AddWithValue("@OriginalSite", lop.Site); // Dùng string
-                    command.ExecuteNonQuery();
-                }
+                existingLop.TenLop = lop.TenLop;
+                existingLop.Khoa = lop.Khoa;
+                _context.SaveChanges();
+                Console.WriteLine($"Đã cập nhật lớp {lop.MaLop} trên Site {lop.Site}.");
             }
-            Console.WriteLine($"Đã cập nhật lớp {lop.MaLop} trên Site {lop.Site}.");
+            else
+            {
+                Console.WriteLine("Không tìm thấy bản ghi để cập nhật.");
+            }
         }
 
         // Đã sửa int site thành string site
         public void DeleteLop(string maLop, string site)
         {
-            using (var connection = GetConnection())
+            var lop = _context.Lops.FirstOrDefault(l => l.MaLop == maLop && l.Site == site);
+            if (lop != null)
             {
-                connection.Open();
-                using (var command = new SqlCommand("DELETE FROM V_Lop WHERE MaLop = @MaLop AND Site = @Site", connection))
-                {
-                    command.Parameters.AddWithValue("@MaLop", maLop);
-                    command.Parameters.AddWithValue("@Site", site); // Dùng string
-                    command.ExecuteNonQuery();
-                }
+                _context.Lops.Remove(lop);
+                _context.SaveChanges();
+                Console.WriteLine($"Đã xóa lớp {maLop} trên Site {site}.");
             }
-            Console.WriteLine($"Đã xóa lớp {maLop} trên Site {site}.");
+            else
+            {
+                Console.WriteLine("Không tìm thấy bản ghi để xóa.");
+            }
         }
 
         public List<Lop> GetAllLops()
         {
-            var lops = new List<Lop>();
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-                using (var command = new SqlCommand("SELECT MaLop, TenLop, Khoa, Site FROM V_Lop", connection))
-                {
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            lops.Add(new Lop
-                            {
-                                MaLop = reader["MaLop"].ToString(),
-                                TenLop = reader["TenLop"].ToString(),
-                                Khoa = reader["Khoa"].ToString(),
-                                // Đã sửa, đọc thẳng string, không Convert
-                                Site = reader["Site"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-            return lops;
+            return _context.Lops.ToList();
         }
 
         // Đã sửa int site thành string site
         public Lop GetLopByMaLopAndSite(string maLop, string site)
         {
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-                using (var command = new SqlCommand("SELECT MaLop, TenLop, Khoa, Site FROM V_Lop WHERE MaLop = @MaLop AND Site = @Site", connection))
-                {
-                    command.Parameters.AddWithValue("@MaLop", maLop);
-                    command.Parameters.AddWithValue("@Site", site); // Dùng string
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new Lop
-                            {
-                                MaLop = reader["MaLop"].ToString(),
-                                TenLop = reader["TenLop"].ToString(),
-                                Khoa = reader["Khoa"].ToString(),
-                                // Đã sửa, đọc thẳng string, không Convert
-                                Site = reader["Site"].ToString()
-                            };
-                        }
-                    }
-                }
-            }
-            return null;
+            return _context.Lops.FirstOrDefault(l => l.MaLop == maLop && l.Site == site);
+        }
+
+        public void DeleteAllLops()
+        {
+            _context.Lops.RemoveRange(_context.Lops);
+            _context.SaveChanges();
+            Console.WriteLine("Đã xóa tất cả các Lớp.");
         }
     }
 }

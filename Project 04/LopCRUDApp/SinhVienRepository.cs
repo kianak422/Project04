@@ -1,174 +1,83 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace LopCRUDApp
 {
     public class SinhVienRepository
     {
-        private readonly string _connectionString;
+        private readonly ApplicationDbContext _context;
 
-        public SinhVienRepository(string connectionString)
+        public SinhVienRepository(ApplicationDbContext context)
         {
-            _connectionString = connectionString;
-        }
-
-        private SqlConnection GetConnection()
-        {
-            return new SqlConnection(_connectionString);
+            _context = context;
         }
 
         // CREATE
         public void AddSinhVien(SinhVien sv)
         {
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-
-                using (var command = new SqlCommand(
-                    @"INSERT INTO V_SinhVien (MaSV, HoTen, Phai, NgaySinh, MaLop, HocBong, Site)
-                      VALUES (@MaSV, @HoTen, @Phai, @NgaySinh, @MaLop, @HocBong, @Site)", connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", sv.MaSV);
-                    command.Parameters.AddWithValue("@HoTen", sv.HoTen);
-                    command.Parameters.AddWithValue("@Phai", sv.Phai);
-                    command.Parameters.AddWithValue("@NgaySinh", sv.NgaySinh);
-                    command.Parameters.AddWithValue("@MaLop", sv.MaLop);
-                    command.Parameters.AddWithValue("@HocBong", sv.HocBong);
-                    command.Parameters.AddWithValue("@Site", sv.Site);
-
-                    command.ExecuteNonQuery();
-                }
-            }
-
+            _context.SinhViens.Add(sv);
+            _context.SaveChanges();
             Console.WriteLine($"Đã thêm sinh viên {sv.HoTen} vào Site {sv.Site}.");
         }
 
         // UPDATE
         public void UpdateSinhVien(SinhVien sv)
         {
-            using (var connection = GetConnection())
+            var existingSinhVien = _context.SinhViens.FirstOrDefault(s => s.MaSV == sv.MaSV && s.Site == sv.Site);
+            if (existingSinhVien != null)
             {
-                connection.Open();
-
-                using (var command = new SqlCommand(
-                    @"UPDATE V_SinhVien 
-                      SET HoTen = @HoTen, Phai = @Phai, NgaySinh = @NgaySinh, 
-                          MaLop = @MaLop, HocBong = @HocBong
-                      WHERE MaSV = @MaSV AND Site = @Site", connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", sv.MaSV);
-                    command.Parameters.AddWithValue("@HoTen", sv.HoTen);
-                    command.Parameters.AddWithValue("@Phai", sv.Phai);
-                    command.Parameters.AddWithValue("@NgaySinh", sv.NgaySinh);
-                    command.Parameters.AddWithValue("@MaLop", sv.MaLop);
-                    command.Parameters.AddWithValue("@HocBong", sv.HocBong);
-                    command.Parameters.AddWithValue("@Site", sv.Site);
-
-                    command.ExecuteNonQuery();
-                }
+                existingSinhVien.HoTen = sv.HoTen;
+                existingSinhVien.Phai = sv.Phai;
+                existingSinhVien.NgaySinh = sv.NgaySinh;
+                existingSinhVien.MaLop = sv.MaLop;
+                existingSinhVien.HocBong = sv.HocBong;
+                _context.SaveChanges();
+                Console.WriteLine($"Đã cập nhật sinh viên {sv.MaSV} trên Site {sv.Site}.");
             }
-
-            Console.WriteLine($"Đã cập nhật sinh viên {sv.MaSV} trên Site {sv.Site}.");
+            else
+            {
+                Console.WriteLine("Không tìm thấy bản ghi để cập nhật.");
+            }
         }
 
         // DELETE
         public void DeleteSinhVien(string maSV, string site)
         {
-            using (var connection = GetConnection())
+            var sinhVien = _context.SinhViens.FirstOrDefault(s => s.MaSV == maSV && s.Site == site);
+            if (sinhVien != null)
             {
-                connection.Open();
-
-                using (var command = new SqlCommand(
-                    @"DELETE FROM V_SinhVien WHERE MaSV = @MaSV AND Site = @Site",
-                    connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", maSV);
-                    command.Parameters.AddWithValue("@Site", site);
-
-                    command.ExecuteNonQuery();
-                }
+                _context.SinhViens.Remove(sinhVien);
+                _context.SaveChanges();
+                Console.WriteLine($"Đã xóa sinh viên {maSV} trên Site {site}.");
             }
-
-            Console.WriteLine($"Đã xóa sinh viên {maSV} trên Site {site}.");
+            else
+            {
+                Console.WriteLine("Không tìm thấy bản ghi để xóa.");
+            }
         }
 
         // READ ALL
-        public List<SinhVien> GetAllSinhVien()
+        public List<SinhVien> GetAllSinhViens()
         {
-            var list = new List<SinhVien>();
-
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-
-                using (var command = new SqlCommand(
-                    @"SELECT MaSV, HoTen, Phai, NgaySinh, MaLop, HocBong, Site 
-                      FROM V_SinhVien", connection))
-                {
-                    using (var reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            list.Add(new SinhVien
-                            {
-                                MaSV = reader["MaSV"].ToString(),
-                                HoTen = reader["HoTen"].ToString(),
-                                Phai = reader["Phai"].ToString(),
-                                NgaySinh = Convert.ToDateTime(reader["NgaySinh"]),
-                                MaLop = reader["MaLop"].ToString(),
-                                HocBong = Convert.ToDecimal(reader["HocBong"]),
-                                Site = reader["Site"].ToString()
-                            });
-                        }
-                    }
-                }
-            }
-
-            return list;
+            return _context.SinhViens.ToList();
         }
 
         // READ by MaSV + Site (hàm gốc của bạn)
         public SinhVien GetSinhVienByMaSVAndSite(string maSV, string site)
         {
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-
-                using (var command = new SqlCommand(
-                    @"SELECT MaSV, HoTen, Phai, NgaySinh, MaLop, HocBong, Site
-                      FROM V_SinhVien
-                      WHERE MaSV = @MaSV AND Site = @Site", connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", maSV);
-                    command.Parameters.AddWithValue("@Site", site);
-
-                    using (var reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            return new SinhVien
-                            {
-                                MaSV = reader["MaSV"].ToString(),
-                                HoTen = reader["HoTen"].ToString(),
-                                Phai = reader["Phai"].ToString(),
-                                NgaySinh = Convert.ToDateTime(reader["NgaySinh"]),
-                                MaLop = reader["MaLop"].ToString(),
-                                HocBong = Convert.ToDecimal(reader["HocBong"]),
-                                Site = reader["Site"].ToString()
-                            };
-                        }
-                    }
-                }
-            }
-
-            return null;
+            return _context.SinhViens.FirstOrDefault(s => s.MaSV == maSV && s.Site == site);
         }
 
         // 🔥 HÀM MỚI THÊM VÀO — PHÙ HỢP VỚI Program.cs
         public SinhVien GetSinhVienById(string maSV, string site)
         {
-            return GetSinhVienByMaSVAndSite(maSV, site);
+            return _context.SinhViens.FirstOrDefault(s => s.MaSV == maSV && s.Site == site);
+        }
+
+        public void DeleteAllSinhViens()
+        {
+            _context.SinhViens.RemoveRange(_context.SinhViens);
+            _context.SaveChanges();
+            Console.WriteLine("Đã xóa tất cả các Sinh Viên.");
         }
     }
 }

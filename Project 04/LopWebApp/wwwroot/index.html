@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Quản Lý Lớp & Sinh Viên</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Quản Lý Lớp & Sinh Viên (UI đơn giản)</h1>
+  </header>
+  <div id="statusBanner" class="banner">Kiểm tra kết nối cơ sở dữ liệu...</div>
+
+  <main>
+    <div class="content">
+    <section id="lops" class="module">
+      <h2>Lớp</h2>
+      <div class="actions">
+        <button id="refreshLops">Làm mới</button>
+        <button id="showAddLop">Thêm Lớp</button>
+      </div>
+      <div id="lopForm" class="form hidden">
+        <input id="lopMaLop" placeholder="MaLop">
+        <input id="lopTenLop" placeholder="TenLop">
+        <input id="lopKhoa" placeholder="Khoa">
+        <input id="lopSite" placeholder="Site (Site1|Site2|Site3)">
+        <button id="saveLop">Lưu</button>
+        <button id="cancelLop">Hủy</button>
+      </div>
+      <table id="lopTable">
+        <thead>
+          <tr><th>MaLop</th><th>TenLop</th><th>Khoa</th><th>Site</th><th>Hành động</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="dangky" class="module hidden">
+      <h2>Đăng Ký</h2>
+      <div class="actions">
+        <button id="refreshDK">Làm mới</button>
+        <button id="showAddDK">Thêm Đăng Ký</button>
+      </div>
+      <div id="dkForm" class="form hidden">
+        <input id="dkMaSV" placeholder="MaSV">
+        <input id="dkMaMon" placeholder="MaMon">
+        <input id="dkDiem1" placeholder="Diem1">
+        <input id="dkDiem2" placeholder="Diem2">
+        <input id="dkDiem3" placeholder="Diem3">
+        <input id="dkSite" placeholder="Site">
+        <button id="saveDK">Lưu</button>
+        <button id="cancelDK">Hủy</button>
+      </div>
+      <table id="dkTable">
+        <thead>
+          <tr><th>MaSV</th><th>MaMon</th><th>Diem1</th><th>Diem2</th><th>Diem3</th><th>Site</th><th>Hành động</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="query" class="module hidden">
+      <h2>Truy Vấn</h2>
+      <div class="query-actions">
+        <div class="q1">
+          <h4>Form 1: Tìm Khoa của Sinh viên</h4>
+          <input id="q1MaSV" placeholder="MaSV">
+          <button id="runQ1">Chạy</button>
+          <pre id="q1Result"></pre>
+        </div>
+        <div class="q2">
+          <h4>Form 2: Bảng điểm Sinh viên</h4>
+          <input id="q2MaSV" placeholder="MaSV">
+          <button id="runQ2">Chạy</button>
+          <table id="q2Table"><thead><tr><th>MaMon</th><th>Diem1</th><th>Diem2</th><th>Diem3</th><th>DiemTB</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div class="q3">
+          <h4>Form 3: Điểm TB cao nhất mỗi Khoa</h4>
+          <button id="runQ3">Chạy</button>
+          <table id="q3Table"><thead><tr><th>Khoa</th><th>DiemTBMax</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="sinhviens" class="module hidden">
+      <h2>Sinh Viên</h2>
+      <div class="actions">
+        <button id="refreshSV">Làm mới</button>
+        <button id="showAddSV">Thêm SV</button>
+      </div>
+      <div id="svForm" class="form hidden">
+        <input id="svMaSV" placeholder="MaSV">
+        <input id="svHoTen" placeholder="HoTen">
+        <input id="svPhai" placeholder="Phai">
+        <input id="svNgaySinh" placeholder="NgaySinh (yyyy-MM-dd)">
+        <input id="svMaLop" placeholder="MaLop">
+        <input id="svHocBong" placeholder="HocBong">
+        <input id="svSite" placeholder="Site (Site1|Site2|Site3)">
+        <button id="saveSV">Lưu</button>
+        <button id="cancelSV">Hủy</button>
+      </div>
+      <table id="svTable">
+        <thead>
+          <tr><th>MaSV</th><th>HoTen</th><th>Phai</th><th>NgaySinh</th><th>MaLop</th><th>HocBong</th><th>Site</th><th>Hành động</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+    </div>
+    <nav class="side-nav">
+      <h3>Modules</h3>
+      <ul>
+        <li><a href="lops.html">Module Lớp</a></li>
+        <li><a href="dangky.html">Module Đăng Ký</a></li>
+        <li><a href="query.html">Module Truy Vấn</a></li>
+        <li><a href="sinhviens.html">Module Sinh Viên</a></li>
+      </ul>
+    </nav>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

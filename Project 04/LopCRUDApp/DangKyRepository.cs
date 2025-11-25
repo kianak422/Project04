@@ -1,88 +1,70 @@
-﻿using Microsoft.Data.SqlClient;
-using System.Data;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace LopCRUDApp
 {
     public class DangKyRepository
     {
-        private readonly string _connectionString;
+        private readonly ApplicationDbContext _context;
 
-        public DangKyRepository(string connectionString)
+        public DangKyRepository(ApplicationDbContext context)
         {
-            _connectionString = connectionString;
+            _context = context;
         }
 
-        private SqlConnection GetConnection()
+        public List<DangKy> GetAllDangKys()
         {
-            return new SqlConnection(_connectionString);
+            return _context.DangKys.ToList();
         }
 
         public void AddDangKy(DangKy dk)
         {
-            // Giả định trigger V_DangKy (phần của Anh) đã được tạo
-            using (var connection = GetConnection())
-            {
-                connection.Open();
-                string query = "INSERT INTO V_DangKy (MaSV, MaMon, Diem1, Diem2, Diem3, Site) VALUES (@MaSV, @MaMon, @Diem1, @Diem2, @Diem3, @Site)";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", dk.MaSV);
-                    command.Parameters.AddWithValue("@MaMon", dk.MaMon);
-                    command.Parameters.AddWithValue("@Diem1", (object)dk.Diem1 ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Diem2", (object)dk.Diem2 ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Diem3", (object)dk.Diem3 ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Site", dk.Site); // Cần Site để trigger định tuyến
-                    command.ExecuteNonQuery();
-                }
-            }
+            _context.DangKys.Add(dk);
+            _context.SaveChanges();
             Console.WriteLine($"Đã thêm đăng ký cho SV {dk.MaSV} - Môn {dk.MaMon} vào {dk.Site}.");
+        }
+
+        public DangKy? GetDangKyByMaSVMaMonAndSite(string maSV, string maMon, string site)
+        {
+            return _context.DangKys.FirstOrDefault(dk => dk.MaSV == maSV && dk.MaMon == maMon && dk.Site == site);
         }
 
         public void UpdateDiem(string maSV, string maMon, string site, decimal? d1, decimal? d2, decimal? d3)
         {
-            using (var connection = GetConnection())
+            var dangKy = _context.DangKys.FirstOrDefault(dk => dk.MaSV == maSV && dk.MaMon == maMon && dk.Site == site);
+            if (dangKy != null)
             {
-                connection.Open();
-                string query = @"UPDATE V_DangKy 
-                                 SET Diem1 = @Diem1, Diem2 = @Diem2, Diem3 = @Diem3 
-                                 WHERE MaSV = @MaSV AND MaMon = @MaMon AND Site = @Site";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", maSV);
-                    command.Parameters.AddWithValue("@MaMon", maMon);
-                    command.Parameters.AddWithValue("@Site", site);
-                    command.Parameters.AddWithValue("@Diem1", (object)d1 ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Diem2", (object)d2 ?? DBNull.Value);
-                    command.Parameters.AddWithValue("@Diem3", (object)d3 ?? DBNull.Value);
-
-                    int rows = command.ExecuteNonQuery();
-                    if (rows > 0)
-                        Console.WriteLine($"Đã cập nhật điểm cho SV {maSV} - Môn {maMon} tại {site}.");
-                    else
-                        Console.WriteLine("Không tìm thấy bản ghi để cập nhật.");
-                }
+                dangKy.Diem1 = d1;
+                dangKy.Diem2 = d2;
+                dangKy.Diem3 = d3;
+                _context.SaveChanges();
+                Console.WriteLine($"Đã cập nhật điểm cho SV {maSV} - Môn {maMon} tại {site}.");
+            }
+            else
+            {
+                Console.WriteLine("Không tìm thấy bản ghi để cập nhật.");
             }
         }
 
         public void DeleteDangKy(string maSV, string maMon, string site)
         {
-            using (var connection = GetConnection())
+            var dangKy = _context.DangKys.FirstOrDefault(dk => dk.MaSV == maSV && dk.MaMon == maMon && dk.Site == site);
+            if (dangKy != null)
             {
-                connection.Open();
-                string query = "DELETE FROM V_DangKy WHERE MaSV = @MaSV AND MaMon = @MaMon AND Site = @Site";
-                using (var command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@MaSV", maSV);
-                    command.Parameters.AddWithValue("@MaMon", maMon);
-                    command.Parameters.AddWithValue("@Site", site);
-
-                    int rows = command.ExecuteNonQuery();
-                    if (rows > 0)
-                        Console.WriteLine($"Đã xóa đăng ký cho SV {maSV} - Môn {maMon} tại {site}.");
-                    else
-                        Console.WriteLine("Không tìm thấy bản ghi để xóa.");
-                }
+                _context.DangKys.Remove(dangKy);
+                _context.SaveChanges();
+                Console.WriteLine($"Đã xóa đăng ký cho SV {maSV} - Môn {maMon} tại {site}.");
             }
+            else
+            {
+                Console.WriteLine("Không tìm thấy bản ghi để xóa.");
+            }
+        }
+
+        public void DeleteAllDangKys()
+        {
+            _context.DangKys.RemoveRange(_context.DangKys);
+            _context.SaveChanges();
+            Console.WriteLine("Đã xóa tất cả các Đăng Ký.");
         }
     }
 }
