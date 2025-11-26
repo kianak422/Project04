@@ -24,13 +24,26 @@ builder.Services.AddScoped<SinhVienRepository>();
 builder.Services.AddScoped<DangKyRepository>();
 builder.Services.AddScoped<QueryRepository>();
 
+builder.Services.AddLogging();
+builder.Logging.AddConsole().SetMinimumLevel(LogLevel.Debug);
+
 var app = builder.Build();
 
 // Apply migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();
+    try
+    {
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while applying migrations.");
+        // Optionally re-throw or handle the exception as appropriate for your application
+        throw;
+    }
 }
 
 app.UseDefaultFiles();
